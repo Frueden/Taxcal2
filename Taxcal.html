@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thai Tax Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="number"] {
+            margin-top: 5px;
+            padding: 5px;
+            width: 100%;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Welcome to the Thai Tax Calculator</h1>
+<p>Please enter your annual salary to calculate your tax.</p>
+
+<label for="salary">Enter your annual salary in Baht:</label>
+<input type="number" id="salary" placeholder="Annual Salary" />
+
+<button onclick="calculateTax()">Calculate Tax</button>
+
+<div class="result" id="result"></div>
+
+<script>
+function calculateTax() {
+    const salary = parseFloat(document.getElementById('salary').value);
+    let taxPaid = 0;  // Total tax to be paid
+
+    // Tax brackets: (upper limit, tax rate, max tax)
+    const taxBrackets = [
+        [150000, 0, 0],     // 1 - 150,000 Baht (0%, max 0)
+        [300000, 0.05, 7500],   // 150,001 - 300,000 Baht (5%, max 7,500)
+        [500000, 0.10, 20000],  // 300,001 - 500,000 Baht (10%, max 20,000)
+        [750000, 0.15, 37500],  // 500,001 - 750,000 Baht (15%, max 37,500)
+        [1000000, 0.20, 50000], // 750,001 - 1,000,000 Baht (20%, max 50,000)
+        [2000000, 0.25, 250000], // 1,000,001 - 2,000,000 Baht (25%, max 250,000)
+        [5000000, 0.30, 900000], // 2,000,001 - 5,000,000 Baht (30%, max 900,000)
+        [Infinity, 0.35, null]   // Above 5,000,000 Baht (35%, no max)
+    ];
+
+    let remainingSalary = salary;
+
+    for (let i = 0; i < taxBrackets.length; i++) {
+        const [limit, rate, maxTax] = taxBrackets[i];
+        
+        if (remainingSalary > limit) {
+            if (i > 0) {
+                const taxableAmount = limit - taxBrackets[i-1][0];
+                const stepTax = Math.min(taxableAmount * rate, maxTax);
+                taxPaid += stepTax;
+            }
+        } else {
+            const taxableAmount = remainingSalary - (i > 0 ? taxBrackets[i-1][0] : 0);
+            const stepTax = Math.min(taxableAmount * rate, maxTax);
+            taxPaid += stepTax;
+            break;  // Exit once the taxable salary is fully covered
+        }
+    }
+
+    document.getElementById('result').innerText = `Your calculated tax is: ${taxPaid.toFixed(2)} Baht`;
+}
+</script>
+
+</body>
+</html>
